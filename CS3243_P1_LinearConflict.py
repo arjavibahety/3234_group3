@@ -1,8 +1,8 @@
 import os
 import sys
-import copy
 import heapq
 import math
+import time
 
 class Puzzle(object):
     def __init__(self, init_state, goal_state):
@@ -16,6 +16,8 @@ class Puzzle(object):
         #TODO
         # implement your search algorithm here
         # Get unmodifiable states
+        start_time = time.time()
+        print('Solving...')
         unmodifiable_initial_state = tuple(tuple(i) for i in self.init_state)
         unmodifiable_goal_state = tuple(tuple(i) for i in self.goal_state)
         # Exit if not solvable
@@ -25,11 +27,16 @@ class Puzzle(object):
         frontier = []
         heapq.heapify(frontier)
         heapq.heappush(frontier, (0, start_node))
-        visited = {unmodifiable_initial_state: Node(unmodifiable_initial_state, 0, False, False)}
+        visited = {}
         goal_found = False
         goal_node = False
         while len(frontier) > 0 and not goal_found:
             current = heapq.heappop(frontier)
+            if (current[1].state in visited):
+                continue
+            else:
+                visited[current[1].state] = 1
+            
             if (current[1].has_state_equals_to(unmodifiable_goal_state)):
                 goal_found = True
                 goal_node = current[1]
@@ -37,12 +44,12 @@ class Puzzle(object):
             successors = current[1].get_successors()
             # Successors are a list of Nodes.
             for successor in successors:
-                if successor.state not in visited or successor.get_actual_cost() < visited[successor.state].get_actual_cost():
-                    visited[successor.state] = current[1]
-                    fn = successor.get_actual_cost() + successor.get_heuristic_cost()
+                if successor.state not in visited:
+                    fn = successor.get_actual_cost() + 1.0001*successor.get_heuristic_cost()
                     heapq.heappush(frontier, (fn, successor))
         path = self.__get_path(unmodifiable_initial_state, goal_node)
         print(self.__apply_moves_on_state(unmodifiable_initial_state, path))
+        print('Execution time: {duration}'.format(duration=(time.time() - start_time)))
         return path
 
     # Function to test if algorithm produces the correct goal state.
@@ -171,6 +178,13 @@ class Node(object):
         print('\n')'''
         return linear_conflict
 
+    def is_opposite_direction(self, direction1, direction2):
+        opposite_directions = { "LEFT": "RIGHT",
+                                "RIGHT": "LEFT",
+                                "UP": "DOWN",
+                                "DOWN": "UP"}
+        return direction1 == opposite_directions[direction2]
+
     def get_actual_cost(self):
         return self.g
 
@@ -192,8 +206,11 @@ class Node(object):
         down_index = [zero_row + 1, zero_col, "UP"]
         indices = [up_index, left_index, right_index, down_index]
         for index in indices:
-            # Ignore if indices out of bound
+            # Ignore if indices out of bound.
             if (index[0] < 0 or index[0] >= self.n) or (index[1] < 0 or index[1] >= self.n):
+                continue
+            # Don't go back to previous state (opposite direction).
+            if self.is_opposite_direction(self.direction, index[2]):
                 continue
             next_state = [list(i) for i in self.state]
             next_state[zero_row][zero_col] = next_state[index[0]][index[1]]
