@@ -42,11 +42,13 @@ class Puzzle(object):
                     fn = successor.get_actual_cost() + successor.get_heuristic_cost()
                     heapq.heappush(frontier, (fn, successor))
         path = self.__get_path(unmodifiable_initial_state, goal_node)
-        print(self.__is_correct(unmodifiable_initial_state, path))
+        print(self.__apply_moves_on_state(unmodifiable_initial_state, path))
         return path
 
     # Function to test if algorithm produces the correct goal state.
-    def __is_correct(self, initial_state, moves):
+    # Input is a list of moves e.g ["UP", "DOWN", "LEFT"], returns the state
+    # After executing all the moves on the initial_state.
+    def __apply_moves_on_state(self, initial_state, moves):
         if len(moves) == 0:
             return initial_state
         else:
@@ -73,7 +75,7 @@ class Puzzle(object):
                 modifiable_state[zero_row][zero_col] = modifiable_state[zero_row + 1][zero_col]
                 modifiable_state[zero_row + 1][zero_col] = 0
             next_state = tuple(tuple(k) for k in modifiable_state)
-            return self.__is_correct(next_state, moves[1::])
+            return self.__apply_moves_on_state(next_state, moves[1::])
 
     # Function to check if the puzzle is solvable
     def __is_solvable(self, initial_state):
