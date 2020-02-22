@@ -32,9 +32,10 @@ class Puzzle(object):
         # heapq.heapify(frontier)
         # heapq.heappush(frontier, start_node)
         goal_node = False
+        is_goal_not_found = True
         current = True
         # while len(frontier) > 0:
-        while frontier.n > 0 and current:
+        while frontier.n > 0 and current and is_goal_not_found:
             # current = heapq.heappop(frontier)
             current = frontier.pop()
             if visited.get(current.state) and visited[current.state].g < current.g:
@@ -44,15 +45,15 @@ class Puzzle(object):
 
             if self.is_equal_states(current.state, goal_state_tuple):
                 goal_node = current
+                is_goal_not_found = False
                 break
 
             neighbors = current.get_neighbors()
 
             for neighbor in neighbors:
-                if visited.get(neighbor.state):
+                if visited.get(neighbor.state) and visited[neighbor.state].g <= neighbor.g:
                     continue
 
-                # heapq.heappush(frontier, neighbor)
                 frontier.add(neighbor)
 
         path = self.get_path(goal_node.state, visited)
@@ -122,15 +123,10 @@ class Node:
         self.g = g
         self.parent = parent
         self.direction = direction
-        self.f = self.get_manhattan_dis(state, goal_state_hash) + g
+        self.h = self.get_manhattan_dis(state, goal_state_hash)
+        self.f = self.h + g
         self.goal_state_hash = goal_state_hash
         self.n = len(state)
-        # self.prev_states = {}
-        # if parent is not false
-        # if parent:
-        #     self.prev_states = {parent.state}
-        #     self.prev_states.update(parent.prev_states)
-        # print("prev states: ", self.prev_states)
 
     def __lt__(self, other):
         return self.g < other.g
@@ -180,9 +176,6 @@ class Node:
             neighbor_state[choice[0]][choice[1]] = 0
 
             neighbor_state_tuple = tuple(tuple(i) for i in neighbor_state)
-
-            # if neighbor_state_tuple in self.prev_states:
-            #     continue
 
             neighbors.append(Node(neighbor_state_tuple, self.g + 1, self,
                                   choice[2], self.goal_state_hash))
