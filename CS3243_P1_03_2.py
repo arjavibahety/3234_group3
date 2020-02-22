@@ -133,7 +133,7 @@ class Node:
         # print("prev states: ", self.prev_states)
 
     def __lt__(self, other):
-        return self.f < other.f
+        return self.g < other.g
 
     def __hash__(self):
         return hash(str(self.state))
@@ -197,14 +197,17 @@ class Bucket:
         self.n = 0
 
     def add(self, node):
-        gCost = node.f
-        if self.dict.get(gCost):
-            self.dict[gCost].append(node)
+        fCost = node.f
+        if self.dict.get(fCost):
+            heapq.heappush(self.dict[fCost], node)
         else:
-            self.dict[gCost] = [node]
+            self.dict[fCost] = []
+            heapq.heapify(self.dict[fCost])
+            heapq.heappush(self.dict[fCost], node)
         self.n += 1
-        if gCost < self.min:
-            self.min = gCost
+
+        if fCost < self.min:
+            self.min = fCost
 
     def pop(self):
 
@@ -214,8 +217,6 @@ class Bucket:
             return ans
         else:
             self.dict.pop(self.min, None)
-            # keyList = sorted(self.dict.keys())
-            # self.min = keyList[0]
             self.min = min(self.dict, key=self.dict.get)
             if self.dict.get(self.min) and len(self.dict[self.min]) > 0:
                 ans = self.dict[self.min].pop()
