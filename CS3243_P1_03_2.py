@@ -25,18 +25,18 @@ class Puzzle(object):
         start_node = Node(tuple(tuple(i) for i in init_state),
                           0, False, False, goal_state_hash)
 
-        frontier = []
-        # frontier = Bucket()
-        # frontier.add(start_node)
+        # frontier = []
+        frontier = Bucket()
+        frontier.add(start_node)
         visited = {}
-        heapq.heapify(frontier)
-        heapq.heappush(frontier, start_node)
+        # heapq.heapify(frontier)
+        # heapq.heappush(frontier, start_node)
         goal_node = False
         current = True
-        while len(frontier) > 0:
-          # while frontier.n > 0 and current:
-            current = heapq.heappop(frontier)
-            # current = frontier.pop()
+        # while len(frontier) > 0:
+        while frontier.n > 0 and current:
+            # current = heapq.heappop(frontier)
+            current = frontier.pop()
             if visited.get(current.state) and visited[current.state].g < current.g:
                 continue
 
@@ -52,8 +52,8 @@ class Puzzle(object):
                 if visited.get(neighbor.state):
                     continue
 
-                heapq.heappush(frontier, neighbor)
-                # frontier.add(neighbor)
+                # heapq.heappush(frontier, neighbor)
+                frontier.add(neighbor)
 
         path = self.get_path(goal_node.state, visited)
 
@@ -207,7 +207,6 @@ class Bucket:
             self.min = gCost
 
     def pop(self):
-        ans = -1
 
         if self.dict.get(self.min) and len(self.dict[self.min]) > 0:
             ans = self.dict[self.min].pop()
@@ -274,3 +273,4 @@ if __name__ == "__main__":
     with open(sys.argv[2], 'a') as f:
         for answer in ans:
             f.write(answer+'\n')
+
