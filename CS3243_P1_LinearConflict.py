@@ -1,7 +1,6 @@
 import os
 import sys
 import heapq
-import math
 import time
 
 class Puzzle(object):
@@ -27,15 +26,11 @@ class Puzzle(object):
         frontier = []
         heapq.heapify(frontier)
         heapq.heappush(frontier, start_node)
-        visited = {}
+        visited = {unmodifiable_initial_state: start_node}
         goal_found = False
         goal_node = False
         while len(frontier) > 0 and not goal_found:
             current = heapq.heappop(frontier)
-            if current.state in visited and visited[current.state].g < current.g:
-                continue
-            else:
-                visited[current.state] = current
             
             if (current.has_state_equals_to(unmodifiable_goal_state)):
                 goal_found = True
@@ -44,11 +39,11 @@ class Puzzle(object):
             successors = current.get_successors()
             # Successors are a list of Nodes.
             for successor in successors:
-                if successor.state not in visited:
-                    # visited[successor.state] = successor
+                if successor.state not in visited or successor.g < visited[successor.state].g:
+                    visited[successor.state] = successor
                     heapq.heappush(frontier, successor)
         path = self.__get_path(goal_node.state, visited)
-        # print(self.__apply_moves_on_state(unmodifiable_initial_state, path))
+        print('Testing path produced. Path brings the initial state to: {final_state}'.format(final_state=self.__apply_moves_on_state(unmodifiable_initial_state, path)))
         print('Execution time: {duration}'.format(duration=(time.time() - start_time)))
         return path
 
@@ -154,7 +149,7 @@ class Node(object):
             for j in range(0, self.n):
                 value = self.state[i][j]
                 if value != 0:
-                    correct_index = [math.floor((value - 1)/self.n), (value - 1) % self.n]
+                    correct_index = [(value - 1)//self.n, (value - 1) % self.n]
                     distance += abs(correct_index[0] - i) + abs(correct_index[1] - j)
         return distance
 
@@ -236,22 +231,22 @@ class Node(object):
                     break
         
         # Obtain next set of states.
-        up_index = [zero_row - 1, zero_col, "DOWN"]
-        left_index = [zero_row, zero_col - 1, "RIGHT"]
-        right_index = [zero_row, zero_col + 1, "LEFT"]
-        down_index = [zero_row + 1, zero_col, "UP"]
+        up_index = {"row": zero_row - 1, "col": zero_col, "direction": "DOWN"}
+        left_index = {"row": zero_row, "col": zero_col - 1, "direction": "RIGHT"}
+        right_index = {"row": zero_row, "col": zero_col + 1, "direction": "LEFT"}
+        down_index = {"row": zero_row + 1, "col": zero_col, "direction": "UP"}
         indices = [up_index, left_index, right_index, down_index]
         for index in indices:
             # Ignore if indices out of bound.
-            if (index[0] < 0 or index[0] >= self.n) or (index[1] < 0 or index[1] >= self.n):
+            if (index["row"] < 0 or index["row"] >= self.n) or (index["col"] < 0 or index["col"] >= self.n):
                 continue
             # Don't go back to previous state (opposite direction).
-            if self.is_opposite_direction(self.direction, index[2]):
+            if self.is_opposite_direction(self.direction, index["direction"]):
                 continue
             next_state = [list(i) for i in self.state]
-            next_state[zero_row][zero_col] = next_state[index[0]][index[1]]
-            next_state[index[0]][index[1]] = 0
-            successors.append(Node(tuple(tuple(i) for i in next_state), self.g + 1, self, index[2]))
+            next_state[zero_row][zero_col] = next_state[index["row"]][index["col"]]
+            next_state[index["row"]][index["col"]] = 0
+            successors.append(Node(tuple(tuple(i) for i in next_state), self.g + 1, self, index["direction"]))
         return successors
 
 if __name__ == "__main__":
