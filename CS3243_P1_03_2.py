@@ -211,7 +211,7 @@ class Bucket:
 
         if self.dict.get(self.min) and len(self.dict[self.min]) > 0:
             # print("Min: ", self.min)
-            # print("Max: ", max(self.dict, key=self.dict.get))
+            # print("Max: ", max(self.dict, key=int))
             # print("Key Size: ", len(self.dict.keys()))
             # print("Dict Size: ", len(self.dict[self.min]))
             ans = heapq.heappop(self.dict[self.min])
@@ -221,10 +221,14 @@ class Bucket:
         else:
             # print("#######################################################")
             self.dict.pop(self.min, None)
-            self.min = min(self.dict, key=self.dict.get)
+            self.min = min(self.dict, key=int)
             if self.dict.get(self.min) and len(self.dict[self.min]) > 0:
                 ans = heapq.heappop(self.dict[self.min])
                 # print("g: ", ans.g)
+                # print("Min: ", self.min)
+                # print("Max: ", max(self.dict, key=int))
+                # print("Key Size: ", len(self.dict.keys()))
+                # print("Dict Size: ", len(self.dict[self.min]))
                 self.n -= 1
                 return ans
 
