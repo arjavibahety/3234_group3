@@ -27,13 +27,14 @@ class Puzzle(object):
 
         # frontier = []
         frontier = Bucket()
-        frontier.add(start_node)
+        frontier.push(start_node)
         visited = {}
         # heapq.heapify(frontier)
         # heapq.heappush(frontier, start_node)
         goal_node = False
         is_goal_not_found = True
         current = True
+
         # while len(frontier) > 0:
         while frontier.n > 0 and current and is_goal_not_found:
             # current = heapq.heappop(frontier)
@@ -54,7 +55,7 @@ class Puzzle(object):
                 if visited.get(neighbor.state) and visited[neighbor.state].g <= neighbor.g:
                     continue
 
-                frontier.add(neighbor)
+                frontier.push(neighbor)
 
         path = self.get_path(goal_node.state, visited)
 
@@ -105,6 +106,7 @@ class Puzzle(object):
 
     def get_path(self, goal_state, visited):
         path = []
+        # print("Printing Path: ")
 
         def helper(state):
             # get the current node of the current state
@@ -112,6 +114,7 @@ class Puzzle(object):
             if current.parent:
                 helper(current.parent.state)
                 path.append(current.direction)
+                # print("F: ", current.f, " G: ", current.g)
 
         helper(goal_state)
         return path
@@ -129,7 +132,7 @@ class Node:
         self.n = len(state)
 
     def __lt__(self, other):
-        return self.g < other.g
+        return self.g > other.g
 
     def __hash__(self):
         return hash(str(self.state))
@@ -189,30 +192,39 @@ class Bucket:
         self.min = 0
         self.n = 0
 
-    def add(self, node):
-        fCost = node.f
-        if self.dict.get(fCost):
-            heapq.heappush(self.dict[fCost], node)
+    def push(self, node):
+        f_cost = node.f
+
+        if self.dict.get(f_cost):
+            heapq.heappush(self.dict[f_cost], node)
         else:
-            self.dict[fCost] = []
-            heapq.heapify(self.dict[fCost])
-            heapq.heappush(self.dict[fCost], node)
+            self.dict[f_cost] = []
+            heapq.heapify(self.dict[f_cost])
+            heapq.heappush(self.dict[f_cost], node)
+
         self.n += 1
 
-        if fCost < self.min:
-            self.min = fCost
+        if f_cost < self.min:
+            self.min = f_cost
 
     def pop(self):
 
         if self.dict.get(self.min) and len(self.dict[self.min]) > 0:
-            ans = self.dict[self.min].pop()
+            # print("Min: ", self.min)
+            # print("Max: ", max(self.dict, key=self.dict.get))
+            # print("Key Size: ", len(self.dict.keys()))
+            # print("Dict Size: ", len(self.dict[self.min]))
+            ans = heapq.heappop(self.dict[self.min])
+            # print("g: ", ans.g)
             self.n -= 1
             return ans
         else:
+            # print("#######################################################")
             self.dict.pop(self.min, None)
             self.min = min(self.dict, key=self.dict.get)
             if self.dict.get(self.min) and len(self.dict[self.min]) > 0:
-                ans = self.dict[self.min].pop()
+                ans = heapq.heappop(self.dict[self.min])
+                # print("g: ", ans.g)
                 self.n -= 1
                 return ans
 
