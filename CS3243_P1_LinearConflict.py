@@ -23,7 +23,8 @@ class Puzzle(object):
         if not self.__is_solvable(unmodifiable_initial_state):
             return ["UNSOLVABLE"]
         start_node = Node(unmodifiable_initial_state, 0, False, False)
-        frontier = []
+        frontier = [] #Bucket()
+        #frontier.push(start_node)
         heapq.heapify(frontier)
         heapq.heappush(frontier, start_node)
         visited = {unmodifiable_initial_state: start_node}
@@ -31,7 +32,7 @@ class Puzzle(object):
         goal_node = False
         while len(frontier) > 0 and not goal_found:
             current = heapq.heappop(frontier)
-            
+            #current = frontier.pop()
             if (current.has_state_equals_to(unmodifiable_goal_state)):
                 goal_found = True
                 goal_node = current
@@ -42,8 +43,9 @@ class Puzzle(object):
                 if successor.state not in visited or successor.g < visited[successor.state].g:
                     visited[successor.state] = successor
                     heapq.heappush(frontier, successor)
+                    #frontier.push(successor)
         path = self.__get_path(goal_node.state, visited)
-        print('Testing path produced. Path brings the initial state to: {final_state}'.format(final_state=self.__apply_moves_on_state(unmodifiable_initial_state, path)))
+        #print('Testing path produced. Path brings the initial state to: {final_state}'.format(final_state=self.__apply_moves_on_state(unmodifiable_initial_state, path)))
         print('Execution time: {duration}'.format(duration=(time.time() - start_time)))
         return path
 
@@ -125,7 +127,12 @@ class Node(object):
         self.f = self.g + self.__get_heuristic_cost()
     
     def __lt__(self, other):
-        return self.f < other.f
+        #return self.g > other.g
+        if self.f < other.f or self.f > other.f:
+            return self.f < other.f
+        else:
+            return self.g > other.g
+        
 
     def has_parent(self):
         return self.parent != False
