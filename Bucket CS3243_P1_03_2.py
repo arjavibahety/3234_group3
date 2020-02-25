@@ -150,6 +150,13 @@ class Node:
 
         return manhattan_dis
 
+    def is_opposite_direction(self, direction1, direction2):
+        opposite_directions = {"LEFT": "RIGHT",
+                               "RIGHT": "LEFT",
+                               "UP": "DOWN",
+                               "DOWN": "UP"}
+        return direction1 == opposite_directions[direction2]
+
     def get_neighbors(self):
         row_of_zero = -1
         col_of_zero = -1
@@ -172,6 +179,9 @@ class Node:
 
         for choice in choices:
             if choice[0] < 0 or choice[1] < 0 or choice[0] >= n or choice[1] >= n:
+                continue
+
+            if self.is_opposite_direction(self.direction, choice[2]):
                 continue
 
             neighbor_state = [list(i) for i in self.state]
@@ -283,4 +293,14 @@ if __name__ == "__main__":
     with open(sys.argv[2], 'a') as f:
         for answer in ans:
             f.write(answer+'\n')
+
+
+def get_goal_state_hash(self, goal_state):
+    goal_state_hash = {}
+
+    for i in range(0, len(goal_state)):
+        for j in range(0, len(goal_state)):
+            goal_state_hash[goal_state[i][j]] = (i, j)
+
+    return goal_state_hash
 
